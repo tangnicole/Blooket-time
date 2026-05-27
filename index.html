@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blook Score Home</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 400px;
+    margin: 60px auto;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 20px;
+  }
+  #score {
+    font-size: 48px;
+    color: #4a90e2;
+    margin-bottom: 20px;
+  }
+  button {
+    padding: 12px 24px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #4a90e2;
+    border: none;
+    color: white;
+    border-radius: 6px;
+  }
+  button:hover {
+    background-color: #357ABD;
+  }
+</style>
+</head>
+<body>
+
+<h1>Your Blook Score</h1>
+<div id="score">0</div>
+<button id="increaseScoreBtn">Increase Score</button>
+<br><br>
+<button id="goToPackBtn">Go to Pack Opening</button>
+
+<script>
+  let score = 0;
+  const scoreDiv = document.getElementById('score');
+  const increaseBtn = document.getElementById('increaseScoreBtn');
+  const goToPackBtn = document.getElementById('goToPackBtn');
+
+  increaseBtn.addEventListener('click', () => {
+    score += 10;
+    scoreDiv.textContent = score;
+  });
+
+  goToPackBtn.addEventListener('click', () => {
+    // Save score to localStorage to use in pack page
+    localStorage.setItem('blookScore', score);
+    window.location.href = 'pack.html';
+  });
+</script>
+
+</body>
+</html>
