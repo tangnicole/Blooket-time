@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -60,21 +61,33 @@
   }
 
   /* Rarity colors */
-  .common {
-    background-color: #7f8c8d;
-    box-shadow: 0 0 10px #95a5a6;
+  .uncommon {
+    background-color: #27ae60;
+    box-shadow: 0 0 10px #2ecc71;
+  }
+  .rare {
+    background-color: #2980b9;
+    box-shadow: 0 0 15px #3498db;
+  }
+  .epic {
+    background-color: #8e44ad;
+    box-shadow: 0 0 15px #9b59b6;
+  }
+  .legendary {
+    background-color: #f39c12;
+    box-shadow: 0 0 20px #f1c40f;
   }
   .unique {
-    background-color: #3498db;
-    box-shadow: 0 0 15px #2980b9;
-  }
-  .mythical {
-    background-color: #9b59b6;
-    box-shadow: 0 0 15px #8e44ad;
+    background-color: #e67e22;
+    box-shadow: 0 0 18px #d35400;
   }
   .chroma {
     background: linear-gradient(45deg, #f39c12, #e74c3c, #8e44ad, #3498db);
     box-shadow: 0 0 20px #f39c12;
+  }
+  .mythical {
+    background-color: #c0392b;
+    box-shadow: 0 0 22px #e74c3c;
   }
 
   /* Simple pack opening animation */
@@ -115,38 +128,54 @@
 <script>
   // Blook data: name, rarity, image URL
   const blooks = [
-    {name: "Blaze", rarity: "common", img: "https://i.imgur.com/HXrrM7u.png"},
-    {name: "Frost", rarity: "common", img: "https://i.imgur.com/6rSxN6I.png"},
-    {name: "Spark", rarity: "unique", img: "https://i.imgur.com/9KbY9a5.png"},
-    {name: "Shadow", rarity: "unique", img: "https://i.imgur.com/jJY7TzG.png"},
-    {name: "Phoenix", rarity: "mythical", img: "https://i.imgur.com/SbU0OaW.png"},
-    {name: "Dragon", rarity: "mythical", img: "https://i.imgur.com/5hTvyjP.png"},
+    {name: "Blaze", rarity: "uncommon", img: "https://i.imgur.com/HXrrM7u.png"},
+    {name: "Frost", rarity: "uncommon", img: "https://i.imgur.com/6rSxN6I.png"},
+    {name: "Spark", rarity: "rare", img: "https://i.imgur.com/9KbY9a5.png"},
+    {name: "Shadow", rarity: "rare", img: "https://i.imgur.com/jJY7TzG.png"},
+    {name: "Phoenix", rarity: "epic", img: "https://i.imgur.com/SbU0OaW.png"},
+    {name: "Dragon", rarity: "epic", img: "https://i.imgur.com/5hTvyjP.png"},
+    {name: "Golden Knight", rarity: "legendary", img: "https://i.imgur.com/fJ6zF3v.png"},
+    {name: "Mystic Queen", rarity: "legendary", img: "https://i.imgur.com/GdP6v3a.png"},
+    {name: "Celestial", rarity: "unique", img: "https://i.imgur.com/9kFvG8V.png"},
+    {name: "Phantom", rarity: "unique", img: "https://i.imgur.com/PAmRs7c.png"},
     {name: "Prism", rarity: "chroma", img: "https://i.imgur.com/1KX1G8X.png"},
-    {name: "Nebula", rarity: "chroma", img: "https://i.imgur.com/93XxP5P.png"}
+    {name: "Nebula", rarity: "chroma", img: "https://i.imgur.com/93XxP5P.png"},
+    {name: "Inferno", rarity: "mythical", img: "https://i.imgur.com/zX1v8C0.png"},
+    {name: "Eclipse", rarity: "mythical", img: "https://i.imgur.com/Mr5Qk8M.png"}
   ];
 
-  // Rarity probability weights (sum to 100)
-  // Feel free to adjust probabilities by changing values
+  // Rarity weights you provided (relative)
   const rarityWeights = {
-    common: 60,
-    unique: 25,
-    mythical: 12,
-    chroma: 3
+    uncommon: 100,
+    rare: 10.4,
+    epic: 3.4,
+    legendary: 0.5,
+    unique: 0.010,
+    chroma: 0.03,
+    mythical: 0.006
   };
 
-  // Function to get random rarity based on weights
+  // Normalize weights to sum 1
+  const totalWeight = Object.values(rarityWeights).reduce((a,b) => a + b, 0);
+
   function getRandomRarity() {
-    const rand = Math.random() * 100;
-    if (rand < rarityWeights.chroma) return 'chroma';
-    else if (rand < rarityWeights.chroma + rarityWeights.mythical) return 'mythical';
-    else if (rand < rarityWeights.chroma + rarityWeights.mythical + rarityWeights.unique) return 'unique';
-    else return 'common';
+    const rand = Math.random() * totalWeight;
+    let sum = 0;
+    for (const [rarity, weight] of Object.entries(rarityWeights)) {
+      sum += weight;
+      if (rand <= sum) return rarity;
+    }
+    // fallback
+    return 'uncommon';
   }
 
-  // Get random blook by rarity
   function getRandomBlook() {
     const rarity = getRandomRarity();
     const filtered = blooks.filter(b => b.rarity === rarity);
+    if (filtered.length === 0) {
+      // fallback to uncommon if no blooks found for rarity
+      return blooks.find(b => b.rarity === 'uncommon');
+    }
     const index = Math.floor(Math.random() * filtered.length);
     return filtered[index];
   }
@@ -156,21 +185,18 @@
   const scoreDisplay = document.getElementById('scoreDisplay');
   const backHomeBtn = document.getElementById('backHomeBtn');
 
-  // Load score from localStorage or default 0
   let score = parseInt(localStorage.getItem('blookScore')) || 0;
   scoreDisplay.textContent = `Your Blook Score: ${score}`;
 
-  // Open pack function
   packButton.addEventListener('click', () => {
     packButton.disabled = true;
     resultsDiv.innerHTML = '';
     resultsDiv.classList.add('opening');
 
-    // Small delay to simulate opening animation
     setTimeout(() => {
       resultsDiv.classList.remove('opening');
       const packSize = 5;
-      for (let i = 0; i < packSize; i++) {
+      for(let i=0; i<packSize; i++) {
         const blook = getRandomBlook();
         const blookDiv = document.createElement('div');
         blookDiv.className = `blook ${blook.rarity}`;
@@ -187,8 +213,6 @@
 
         resultsDiv.appendChild(blookDiv);
       }
-
-      // Increase score by 50 each pack opened
       score += 50;
       localStorage.setItem('blookScore', score);
       scoreDisplay.textContent = `Your Blook Score: ${score}`;
