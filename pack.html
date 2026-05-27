@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pack Opening</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 10px;
+  }
+  #scoreDisplay {
+    font-weight: bold;
+    margin-bottom: 30px;
+    font-size: 20px;
+    color: #4a90e2;
+  }
+  #packButton {
+    padding: 12px 28px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #4a90e2;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    margin-bottom: 30px;
+  }
+  #packButton:hover {
+    background-color: #357ABD;
+  }
+  #results {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .blook {
+    width: 100px;
+    border-radius: 8px;
+    padding: 10px;
+    color: white;
+    font-weight: bold;
+    cursor: default;
+    box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+  }
+  .blook img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 8px;
+  }
+  .blook:hover {
+    transform: scale(1.1);
+  }
+
+  /* Rarity colors */
+  .common {
+    background-color: #7f8c8d;
+    box-shadow: 0 0 10px #95a5a6;
+  }
+  .unique {
+    background-color: #3498db;
+    box-shadow: 0 0 15px #2980b9;
+  }
+  .mythical {
+    background-color: #9b59b6;
+    box-shadow: 0 0 15px #8e44ad;
+  }
+  .chroma {
+    background: linear-gradient(45deg, #f39c12, #e74c3c, #8e44ad, #3498db);
+    box-shadow: 0 0 20px #f39c12;
+  }
+
+  /* Simple pack opening animation */
+  .opening {
+    animation: pulse 0.6s ease infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+  }
+
+  #backHomeBtn {
+    margin-top: 30px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: none;
+    background-color: #4a90e2;
+    color: white;
+  }
+  #backHomeBtn:hover {
+    background-color: #357ABD;
+  }
+</style>
+</head>
+<body>
+
+<h1>Pack Opening</h1>
+<div id="scoreDisplay">Your Blook Score: 0</div>
+<button id="packButton">Open Pack</button>
+
+<div id="results"></div>
+
+<button id="backHomeBtn">Back to Home</button>
+
+<script>
+  // Blook data: name, rarity, image URL
+  const blooks = [
+    {name: "Blaze", rarity: "common", img: "https://i.imgur.com/HXrrM7u.png"},
+    {name: "Frost", rarity: "common", img: "https://i.imgur.com/6rSxN6I.png"},
+    {name: "Spark", rarity: "unique", img: "https://i.imgur.com/9KbY9a5.png"},
+    {name: "Shadow", rarity: "unique", img: "https://i.imgur.com/jJY7TzG.png"},
+    {name: "Phoenix", rarity: "mythical", img: "https://i.imgur.com/SbU0OaW.png"},
+    {name: "Dragon", rarity: "mythical", img: "https://i.imgur.com/5hTvyjP.png"},
+    {name: "Prism", rarity: "chroma", img: "https://i.imgur.com/1KX1G8X.png"},
+    {name: "Nebula", rarity: "chroma", img: "https://i.imgur.com/93XxP5P.png"}
+  ];
+
+  // Rarity probability weights (sum to 100)
+  // Feel free to adjust probabilities by changing values
+  const rarityWeights = {
+    common: 60,
+    unique: 25,
+    mythical: 12,
+    chroma: 3
+  };
+
+  // Function to get random rarity based on weights
+  function getRandomRarity() {
+    const rand = Math.random() * 100;
+    if (rand < rarityWeights.chroma) return 'chroma';
+    else if (rand < rarityWeights.chroma + rarityWeights.mythical) return 'mythical';
+    else if (rand < rarityWeights.chroma + rarityWeights.mythical + rarityWeights.unique) return 'unique';
+    else return 'common';
+  }
+
+  // Get random blook by rarity
+  function getRandomBlook() {
+    const rarity = getRandomRarity();
+    const filtered = blooks.filter(b => b.rarity === rarity);
+    const index = Math.floor(Math.random() * filtered.length);
+    return filtered[index];
+  }
+
+  const resultsDiv = document.getElementById('results');
+  const packButton = document.getElementById('packButton');
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  const backHomeBtn = document.getElementById('backHomeBtn');
+
+  // Load score from localStorage or default 0
+  let score = parseInt(localStorage.getItem('blookScore')) || 0;
+  scoreDisplay.textContent = `Your Blook Score: ${score}`;
+
+  // Open pack function
+  packButton.addEventListener('click', () => {
+    packButton.disabled = true;
+    resultsDiv.innerHTML = '';
+    resultsDiv.classList.add('opening');
+
+    // Small delay to simulate opening animation
+    setTimeout(() => {
+      resultsDiv.classList.remove('opening');
+      const packSize = 5;
+      for (let i = 0; i < packSize; i++) {
+        const blook = getRandomBlook();
+        const blookDiv = document.createElement('div');
+        blookDiv.className = `blook ${blook.rarity}`;
+        blookDiv.title = `${blook.name} (${blook.rarity.charAt(0).toUpperCase() + blook.rarity.slice(1)})`;
+
+        const img = document.createElement('img');
+        img.src = blook.img;
+        img.alt = blook.name;
+        blookDiv.appendChild(img);
+
+        const nameDiv = document.createElement('div');
+        nameDiv.textContent = blook.name;
+        blookDiv.appendChild(nameDiv);
+
+        resultsDiv.appendChild(blookDiv);
+      }
+
+      // Increase score by 50 each pack opened
+      score += 50;
+      localStorage.setItem('blookScore', score);
+      scoreDisplay.textContent = `Your Blook Score: ${score}`;
+      packButton.disabled = false;
+    }, 800);
+  });
+
+  backHomeBtn.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+</script>
+
+</body>
+</html>
